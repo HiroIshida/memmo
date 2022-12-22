@@ -5,6 +5,7 @@ import pickle
 import GPy
 from abc import ABC, abstractmethod
 from typing import Generic, Optional, TypeVar, Type, Union
+from sklearn.decomposition import PCA
 
 
 RegressorT = TypeVar("RegressorT", bound="Regressor")
@@ -14,7 +15,7 @@ class Regressor(ABC):
 
     @classmethod
     @abstractmethod
-    def fit(cls: Type[RegressorT], X: np.ndarray, Y: np.ndarray) -> RegressorT:
+    def fit(cls: Type[RegressorT], X: np.ndarray, Y: np.ndarray, **kwargs) -> RegressorT:
         ...
 
     @abstractmethod
@@ -58,12 +59,21 @@ class Straight_Regressor(Regressor):
 @dataclass(frozen=True)
 class GPy_Regressor(Regressor):
     gp: Union[GPy.models.GPRegression, GPy.models.SparseGPRegression]
-    _previous_cov: Optional[np.ndarray] = None
+    pca: Optional[PCA] = None
 
     @classmethod
-    def fit(cls, X: np.ndarray, Y: np.ndarray) -> "GPy_Regressor":
+    def fit(cls, X: np.ndarray, Y: np.ndarray, pca_dim: Optional[int] = None) -> "GPy_Regressor":
         n_data, n_input_dim = X.shape
         Y_flatten = Y.reshape(n_data, -1)
+
+        use_pca = pca_dim is not None
+        if use_pca:
+            pca = PCA(pca_dim)
+            pca.fit(Y_flatten)
+            Y_flatten = pca.transform(Y_flatten)
+        else:
+            pca = None
+        
         kernel = GPy.kern.RBF(input_dim=n_input_dim, variance=0.1,lengthscale=0.3, ARD=True) + GPy.kern.White(input_dim=n_input_dim)
 
         if n_data < 200:
@@ -74,10 +84,12 @@ class GPy_Regressor(Regressor):
             Z = X[:100]
             gp = GPy.models.SparseGPRegression(X, Y_flatten, Z=Z)
             gp.optimize('bfgs')
-        return cls(gp)
+        return cls(gp, pca)
             
     def predict(self, x: np.ndarray):
         y, cov = self.gp.predict(np.expand_dims(x, axis=0))
+        if self.pca is not None:
+            y = self.pca.inverse_transform(np.expand_dims(y, axis=0))[0]
         return y
     
 

@@ -88,6 +88,7 @@ if __name__ == "__main__":
             "nn": NN_Regressor.fit(X, Y),
             "std": Straight_Regressor.fit(X, Y),
             "gpr": GPy_Regressor.fit(X, Y),
+            "gpr-pca": GPy_Regressor.fit(X, Y, pca_dim=20),
     }
 
     # prediction by all regressors
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     ax.plot(goal[0], goal[1], "ko")
 
     # visualize prediction results
-    plot_styles = ["bo-", "ko-", "co-"]
+    plot_styles = ["bo-", "ko-", "co-", "go-"]
     for regr_name, plot_style in zip(result_table.keys(), plot_styles):
         result_traj = result_table[regr_name]
         traj = Trajectory(list(result_traj.reshape(-1, 2)))
