@@ -75,23 +75,6 @@ class GPy_Regressor(Regressor):
         return y
     
 
-@dataclass(frozen=True)
-class Sparse_GPy_R30egressor(Regressor):
-    sparse_gp: GPy.models.SparseGPRegression
-
-    @classmethod
-    def fit(cls, X: np.ndarray, Y: np.ndarray) -> "Sparse_GPy_Regressor":
-        n_inducing_point = 100  # same as the author
-        Z = X[0:n_inducing_point]
-        sparse_gp = GPy.models.SparseGPRegression(X, Y, Z=Z)
-        sparse_gp.optimize('bfgs')
-        return cls(sparse_gp)
-
-    def predict(self, x: np.ndarray):
-        y,cov = self.sparse_gp.predict(x)
-        return y, cov  # cov?
-    
-
 # class DP_GLM_Regressor(Regressor):
 # 
 #     def fit(self,x,y, n_components = 10, n_init = 20 , weight_type = 'dirichlet_process'):
