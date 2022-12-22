@@ -24,6 +24,14 @@ def pick_start_goal(world: SquareWorld) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def generate_data(n_data: int, world: SquareWorld) -> List[Trajectory]:
+    """
+    1. pickup start and goal point
+    2. solve rrt for initial guess of the trajectory optimization (if fail, back to 1)
+    3. solve trajectory optimization using rrt solution as the initial guess
+    4. push the solution trajectory to data
+    NOTE: solution trajectory data contains the information of start and goal. Thus
+    we can extract start and goal points later.
+    """
 
     data: List[Trajectory] = []
 
@@ -62,11 +70,13 @@ def traj_list_to_XY(traj_list: List[Trajectory]) -> Tuple[np.ndarray, np.ndarray
 
 
 if __name__ == "__main__":
+    # construct a square [0, 1] x [0, 1] world with circle obstacles
     sdf1 = CircleObstacle(np.array([0.5, 0.6]), 0.2)
     sdf2 = CircleObstacle(np.array([0.2, 0.4]), 0.1)
     sdf3 = CircleObstacle(np.array([0.7, 0.4]), 0.1)
     world = SquareWorld((sdf1, sdf2, sdf3))
 
+    # create dataset if cache does not exist
     cache_path = Path("/tmp/memmo_traj_list.cache")
     if cache_path.exists():
         with cache_path.open(mode = "rb") as f:
