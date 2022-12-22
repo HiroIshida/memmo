@@ -74,9 +74,8 @@ class GPRRegressor(Regressor):
         else:
             pca = None
         
-        kernel = GPy.kern.RBF(input_dim=n_input_dim, variance=0.1,lengthscale=0.3, ARD=True) + GPy.kern.White(input_dim=n_input_dim)
-
         if n_data < 200:
+            kernel = GPy.kern.RBF(input_dim=n_input_dim, variance=0.1,lengthscale=0.3, ARD=True) + GPy.kern.White(input_dim=n_input_dim)
             gp = GPy.models.GPRegression(X, Y_flatten, kernel)
             num_restarts = 10
             gp.optimize_restarts(num_restarts=num_restarts)
@@ -91,28 +90,3 @@ class GPRRegressor(Regressor):
         if self.pca is not None:
             y = self.pca.inverse_transform(np.expand_dims(y, axis=0))[0]
         return y
-    
-
-# class DP_GLM_Regressor(Regressor):
-# 
-#     def fit(self,x,y, n_components = 10, n_init = 20 , weight_type = 'dirichlet_process'):
-#         import pbdlib as pbd
-#         self.x_joint = np.concatenate([x, y], axis=1)
-#         self.n_joint = self.x_joint.shape[1]
-#         self.n_in = x.shape[1]
-#         self.n_out = y.shape[1]
-#         self.joint_model = pbd.VBayesianGMM({'n_components':n_components, 'n_init':n_init, 'reg_covar': 0.00006 ** 2,
-#      'covariance_prior': 0.00002 ** 2 * np.eye(self.n_joint),'mean_precision_prior':1e-9,'weight_concentration_prior_type':weight_type})
-#         self.joint_model.posterior(data=self.x_joint, dp=False, cov=np.eye(self.n_joint))
-# 
-#     def predict(self,x, return_gmm=True, return_more = False):
-#         result = self.joint_model.condition(x, slice(0, self.n_in), slice(self.n_in, self.n_joint),return_gmm = return_gmm) #
-#         
-#         if return_gmm:
-#             if return_more:
-#                 return result[0], result[1], result[2] 
-#             else:
-#                 index = np.argmax(result[0])
-#                 return result[1][index], result[2][index]
-#         else:
-#             return result[0], result[1]
