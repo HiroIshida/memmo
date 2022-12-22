@@ -4,7 +4,7 @@ import copy
 import pickle
 import GPy
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Type
+from typing import Generic, Optional, TypeVar, Type
 
 
 RegressorT = TypeVar("RegressorT", bound="Regressor")
@@ -58,23 +58,25 @@ class Straight_Regressor(Regressor):
 @dataclass(frozen=True)
 class GPy_Regressor(Regressor):
     gp: GPy.models.GPRegression
+    _previous_cov: Optional[np.ndarray] = None
 
     @classmethod
     def fit(cls, X: np.ndarray, Y: np.ndarray) -> "GPy_Regressor":
-        n_data, n_wp, n_input_dim = X.shape
+        n_data, n_input_dim = X.shape
+        Y_flatten = Y.reshape(n_data, -1)
         kernel = GPy.kern.RBF(input_dim=n_input_dim, variance=0.1,lengthscale=0.3, ARD=True) + GPy.kern.White(input_dim=n_input_dim)
-        gp = GPy.models.GPRegression(X, Y, kernel)
+        gp = GPy.models.GPRegression(X, Y_flatten, kernel)
         num_restarts = 10
         gp.optimize_restarts(num_restarts=num_restarts)
         return cls(gp)
             
     def predict(self, x: np.ndarray):
-        y,cov = self.gp.predict(x)
-        return y, cov  # cov??
+        y, cov = self.gp.predict(np.expand_dims(x, axis=0))
+        return y
     
 
 @dataclass(frozen=True)
-class Sparse_GPy_Regressor(Regressor):
+class Sparse_GPy_R30egressor(Regressor):
     sparse_gp: GPy.models.SparseGPRegression
 
     @classmethod
