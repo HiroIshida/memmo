@@ -25,12 +25,12 @@ class Regressor(ABC):
 
 
 @dataclass(frozen=True)
-class NN_Regressor(Regressor):
+class NNRegressor(Regressor):
     X: np.ndarray
     Y: np.ndarray
 
     @classmethod
-    def fit(cls, X: np.ndarray, Y: np.ndarray) -> "NN_Regressor":
+    def fit(cls, X: np.ndarray, Y: np.ndarray) -> "NNRegressor":
         return cls(X, Y)
 
     def predict(self, x: np.ndarray) -> np.ndarray:
@@ -40,11 +40,11 @@ class NN_Regressor(Regressor):
 
 
 @dataclass(frozen=True)
-class Straight_Regressor(Regressor):
+class StraightRegressor(Regressor):
     n_wp: int
 
     @classmethod
-    def fit(cls, X: np.ndarray, Y: np.ndarray) -> "Straight_Regressor":
+    def fit(cls, X: np.ndarray, Y: np.ndarray) -> "StraightRegressor":
         _, n_wp, _ = Y.shape
         return cls(n_wp)
 
@@ -57,12 +57,12 @@ class Straight_Regressor(Regressor):
 
     
 @dataclass(frozen=True)
-class GPy_Regressor(Regressor):
+class GPRRegressor(Regressor):
     gp: Union[GPy.models.GPRegression, GPy.models.SparseGPRegression]
     pca: Optional[PCA] = None
 
     @classmethod
-    def fit(cls, X: np.ndarray, Y: np.ndarray, pca_dim: Optional[int] = None) -> "GPy_Regressor":
+    def fit(cls, X: np.ndarray, Y: np.ndarray, pca_dim: Optional[int] = None) -> "GPRRegressor":
         n_data, n_input_dim = X.shape
         Y_flatten = Y.reshape(n_data, -1)
 

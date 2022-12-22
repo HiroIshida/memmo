@@ -9,7 +9,7 @@ from square.rrt import RRT
 from square.trajectory import Trajectory
 from square.world import CircleObstacle, SquareWorld
 from typing import Tuple, List
-from regression import NN_Regressor, Straight_Regressor, GPy_Regressor
+from regression import NNRegressor, StraightRegressor, GPRRegressor
 
 
 def pick_start_goal(world: SquareWorld) -> Tuple[np.ndarray, np.ndarray]:
@@ -97,10 +97,10 @@ if __name__ == "__main__":
 
     # fit all regressors
     regressor_table = {
-            "nn": NN_Regressor.fit(X, Y),
-            "std": Straight_Regressor.fit(X, Y),
-            "gpr": GPy_Regressor.fit(X, Y),
-            "gpr-pca": GPy_Regressor.fit(X, Y, pca_dim=20),
+            "nn": NNRegressor.fit(X, Y),
+            "std": StraightRegressor.fit(X, Y),
+            "gpr": GPRRegressor.fit(X, Y),
+            "gpr-pca": GPRRegressor.fit(X, Y, pca_dim=20),
     }
 
     # prediction by all regressors
