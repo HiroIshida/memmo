@@ -82,10 +82,12 @@ if __name__ == "__main__":
         with cache_path.open(mode = "rb") as f:
             traj_list = pickle.load(f)
     else:
-        traj_list = generate_data(1000, world)
+        n_datagen = 1000
+        traj_list = generate_data(n_datagen, world)
         with cache_path.open(mode = "wb") as f:
             pickle.dump(traj_list, f)
-    traj_list = traj_list[:300]
+    n_data_use = 400
+    traj_list = traj_list[:n_data_use]
     X, Y = traj_list_to_XY(traj_list)
 
     #start, goal = pick_start_goal(world)
